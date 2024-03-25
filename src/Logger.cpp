@@ -115,14 +115,14 @@ string Logger::Logging::getTime()
     return buf;
 }
 
-void Logger::Logging::writeLog(const basic_string<char, char_traits<char>, allocator<char>>& path,basic_string<char, char_traits<char>, allocator<char>> log_text, const char *type)
+void Logger::Logging::writeLog(const char *type,basic_string<char, char_traits<char>, allocator<char>> log_text)
 {
     log_text = "[" + getTime() + "]::" + logInformation[type] + ":::" + log_text;
-    filesystem::path dir(path);
+    filesystem::path dir(logPath);
     long file_size;
     MakeDirectory(dir.parent_path().string());
     /* The line `fstream file(path, ios::in | ios::binary | ios::out);` is creating a file stream object named `file` and opening a file specified by the `path` parameter. The file is opened in binary mode (`ios::binary`) and both input and output operations are allowed (`ios::in | ios::out`). This means that the file can be read from and written to. */
-    fstream file(path, ios::in | ios::binary | ios::out);
+    fstream file(logPath, ios::in | ios::binary | ios::out);
     /* The line `file.seekg(0, ios::end);` is used to set the get position indicator of the file stream `file` to the end of the file. This allows us to determine the current size of the file by calling `file.tellg()`, which returns the position of the get pointer. In this case, it is used to check the current size of the file before deciding whether to overwrite the file or append to it. */
     file.seekg(0, ios::end);
     /* The line `long file_size = file.tellg();` is used to determine the current size of the file. */
@@ -130,7 +130,7 @@ void Logger::Logging::writeLog(const basic_string<char, char_traits<char>, alloc
     if (file_size > MAX_SIZE) {
         file.close();
         /* The line `ofstream new_file(path, ios::out | ios::binary | ios::trunc);` is creating a new output file stream object named `new_file` and opening a file specified by the `path` parameter. The file is opened in output mode (`ios::out`), binary mode (`ios::binary`), and truncation mode (`ios::trunc`). */
-        ofstream new_file(path, ios::out | ios::binary | ios::trunc);
+        ofstream new_file(logPath, ios::out | ios::binary | ios::trunc);
         new_file << log_text << endl;
         new_file.close();
     } else {

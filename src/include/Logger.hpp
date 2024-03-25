@@ -1,5 +1,5 @@
-#ifndef LOGGER_H
-#define LOGGER_H
+#ifndef LOGGER_HEADER
+#define LOGGER_HEADER
 
 #include <cstdlib>
 #include <cstdio>
@@ -14,7 +14,7 @@
 #include <concepts>
 #include <map>
 #include <json/json.h>
-#include <Client/LogClient.hpp>
+#include "LogClient.hpp"
 
 using namespace std;
 
@@ -65,4 +65,4 @@ namespace Logger {
         static string to_lower(string sentence);
     };
 }
-#endif // LOGGER_H
+#endif
