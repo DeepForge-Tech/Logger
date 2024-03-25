@@ -1,0 +1,3 @@
+[submodule "LogClient"]
+	path = LogClient
+	url = https://github.com/DeepForge-Tech/LogClient.git
