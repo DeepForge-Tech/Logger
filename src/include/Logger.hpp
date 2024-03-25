@@ -49,7 +49,7 @@ namespace Logger {
                 }
             }
         }
-        void writeLog(const basic_string<char, char_traits<char>, allocator<char>>& path,basic_string<char, char_traits<char>, allocator<char>> log_text, const char *type);
+        void writeLog(const char *type, basic_string<char, char_traits<char>, allocator<char>> log_text);
         void sendError(const string& NameProgram,const string& Architecture,const string& Channel,const string& OS_NAME,const string& FunctionName,const string& LogText);
 
     private:
