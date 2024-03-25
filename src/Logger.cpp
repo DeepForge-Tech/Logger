@@ -117,7 +117,7 @@ string Logger::Logging::getTime()
 
 void Logger::Logging::writeLog(const char *type,basic_string<char, char_traits<char>, allocator<char>> log_text)
 {
-    log_text = "[" + getTime() + "]::" + logInformation[type] + ":::" + log_text;
+    log_text = "[" + getTime() + "]::" + logInformation[to_lower(type)] + ":::" + log_text;
     filesystem::path dir(logPath);
     long file_size;
     MakeDirectory(dir.parent_path().string());
