@@ -16,19 +16,17 @@
 #include <json/json.h>
 #include <LogClient.hpp>
 
-using namespace std;
-
 namespace Logger {
     class Logging {
     public:
         long MAX_SIZE;
-        string logPath;
-        map<string, int> LabelSize = {
+        std::string logPath;
+        std::map<std::string, int> LabelSize = {
                 {"byte", 1},
                 {"kb",   1024},
                 {"mb",   1048576},
                 {"gb",   1073741824}};
-        map<string, string> logInformation = {
+        std::map<std::string, std::string> logInformation = {
                 {"Debug", "[DEBUG]"},
                 {"Info", "[INFO]"},
                 {"Error", "[ERROR]"},
@@ -49,20 +47,25 @@ namespace Logger {
                 }
             }
         }
-        void writeLog(const char *type, basic_string<char, char_traits<char>, allocator<char>> log_text);
-        void sendError(const string& NameProgram,const string& Architecture,const string& Channel,const string& OS_NAME,const string& FunctionName,const string& LogText);
+        void writeLog(const char *type, std::basic_string<char, std::char_traits<char>, std::allocator<char>> log_text);
+        void sendError(std::basic_string<char, std::char_traits<char>, std::allocator<char>> name_program,
+                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> architecture,
+                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> channel,
+                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> os_name,
+                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> function_name,
+                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> log_text);
 
     private:
         /* The 'MakeDirectory' function is used to create a directory (folder) in the file system.*/
-        void MakeDirectory(string dir);
+        void MakeDirectory(std::string dir);
         /* The `convertSize` function is used to convert a given size string into bytes. */
-        void convertSize(string size);
+        void convertSize(std::string size);
 
-        static string replaceAll(string str, const string &from, const string &to);
+        static std::string replaceAll(std::string& str, const std::string& from, const std::string& to);
         /* The `GetTime()` function is used to get the current time and format it as a string. */
-        static string getTime();
+        static std::string getTime();
         // Function of make string to lower
-        static string to_lower(string sentence);
+        static std::string to_lower(const std::string& sentence);
     };
 }
 #endif
