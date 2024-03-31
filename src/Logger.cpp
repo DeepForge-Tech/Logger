@@ -79,7 +79,7 @@ void Logger::Logging::MakeDirectory(std::string dir) {
             dir.erase(0, pos + delimiter.length());
         }
         fullPath = fullPath + "/" + dir;
-        if (!std::system::exists(fullPath))
+        if (!std::filesystem::exists(fullPath))
         {
             std::filesystem::create_directory(fullPath);
         }
