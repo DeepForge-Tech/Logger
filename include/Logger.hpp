@@ -12,7 +12,7 @@
 #include <filesystem>
 #include <cmath>
 #include <concepts>
-#include <map>
+#include <unordered_map>
 #include <json/json.h>
 #include <LogClient/LogClient.hpp>
 
@@ -21,17 +21,17 @@ namespace Logger {
     public:
         long MAX_SIZE;
         std::string logPath;
-        std::map<std::string, int> LabelSize = {
+        std::unordered_map<std::string, int> LabelSize = {
                 {"byte", 1},
                 {"kb",   1024},
                 {"mb",   1048576},
                 {"gb",   1073741824}};
-        std::map<std::string, std::string> logInformation = {
-                {"Debug", "[DEBUG]"},
-                {"Info", "[INFO]"},
-                {"Error", "[ERROR]"},
-                {"Warning", "[WARNING]"},
-                {"Success", "[SUCCESS]"}
+        std::unordered_map<std::string, std::string> logInformation = {
+                {"DEBUG", "[DEBUG]"},
+                {"INFO", "[INFO]"},
+                {"ERROR", "[ERROR]"},
+                {"WARNING", "[WARNING]"},
+                {"SUCCESS", "[SUCCESS]"}
         };
         LogClient::Client client;
 
@@ -47,13 +47,13 @@ namespace Logger {
                 }
             }
         }
-        void writeLog(const char *type, std::basic_string<char, std::char_traits<char>, std::allocator<char>> log_text);
-        void sendError(std::basic_string<char, std::char_traits<char>, std::allocator<char>> name_program,
-                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> architecture,
-                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> channel,
-                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> os_name,
-                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> function_name,
-                        std::basic_string<char, std::char_traits<char>, std::allocator<char>> log_text);
+        void writeLog(const char *type, std::string log_text);
+        void sendError(std::string name_program,
+                        std::string architecture,
+                        std::string channel,
+                        std::string os_name,
+                        std::string function_name,
+                        std::string log_text);
 
     private:
         /* The 'MakeDirectory' function is used to create a directory (folder) in the file system.*/
@@ -61,11 +61,12 @@ namespace Logger {
         /* The `convertSize` function is used to convert a given size string into bytes. */
         void convertSize(std::string size);
 
-        static std::string replaceAll(std::string& str, const std::string& from, const std::string& to);
+        static std::string replaceAll(std::string &str, const std::string &from, const std::string &to);
         /* The `GetTime()` function is used to get the current time and format it as a string. */
         static std::string getTime();
         // Function of make string to lower
-        static std::string to_lower(const std::string& sentence);
+        static std::string to_lower(std::string sentence);
+        static std::string to_upper(std::string sentence);
     };
 }
 #endif

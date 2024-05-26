@@ -1,6 +1,6 @@
 #include <Logger.hpp>
 
-std::string Logger::Logging::to_lower(const std::string& sentence) {
+std::string Logger::Logging::to_lower(const std::string sentence) {
     std::string new_sentence;
     /* The code snippet `for (int i = 0; i < sentence.length(); i++)` is a for loop that iterates over each character in the string `sentence`. */
     for (int i = 0; i < sentence.length(); i++) {
@@ -91,12 +91,8 @@ void Logger::Logging::MakeDirectory(std::string dir) {
 }
 
 
-void Logger::Logging::sendError(std::basic_string<char, std::char_traits<char>, std::allocator<char>> name_program,
-                                std::basic_string<char, std::char_traits<char>, std::allocator<char>> architecture,
-                                std::basic_string<char, std::char_traits<char>, std::allocator<char>> channel,
-                                std::basic_string<char, std::char_traits<char>, std::allocator<char>> os_name,
-                                std::basic_string<char, std::char_traits<char>, std::allocator<char>> function_name,
-                                std::basic_string<char, std::char_traits<char>, std::allocator<char>> log_text)
+void Logger::Logging::sendError(std::string name_program, std::string architecture, std::string channel, 
+                                std::string os_name, std::string function_name,std::string log_text)
 {
     Json::Value data;
     data["name_program"] = name_program;
@@ -120,9 +116,9 @@ std::string Logger::Logging::getTime()
     return buf;
 }
 
-void Logger::Logging::writeLog(const char* type, basic_string<char, char_traits<char>, allocator<char>> log_text)
+void Logger::Logging::writeLog(const char* type, std::string log_text)
 {
-    log_text = "[" + getTime() + "]::" + logInformation[to_lower(type)] + ":::" + log_text;
+    log_text = "[" + getTime() + "]::" + logInformation[to_upper(type)] + ":::" + log_text;
     std::string logDir = std::filesystem::path(logPath).parent_path().generic_string();
     if (!std::filesystem::exists(logDir)) {
         std::filesystem::create_directory(logDir);
@@ -146,4 +142,16 @@ void Logger::Logging::writeLog(const char* type, basic_string<char, char_traits<
             file.close();
         }
     }
+}
+std::string Logger::Logging::to_upper(std::string sentence)
+{
+    std::string new_sentence = "";
+    for (int i = 0; i < sentence.length(); i++)
+    {
+        char ch = sentence[i];
+        // cout << ch << endl;
+        ch = tolower(ch);
+        new_sentence += ch;
+    }
+    return new_sentence;
 }
