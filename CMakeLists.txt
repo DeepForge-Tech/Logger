@@ -17,22 +17,7 @@ set(SOURCE_FILES
         src/Logger.cpp
         include/Logger.hpp
 )
-# jsoncpp
-FetchContent_Declare(jsoncpp
-        GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
-        GIT_TAG master
-)
-# if(NOT jsoncpp_POPULATED)
-#   FetchContent_Populate(jsoncpp)
-#   add_subdirectory(${jsoncpp_SOURCE_DIR} ${jsoncpp_BINARY_DIR})
-# endif()
-FetchContent_MakeAvailable(jsoncpp)
-
-FetchContent_Declare(Client
-        GIT_REPOSITORY https://github.com/DeepForge-Tech/LogClient.git
-        GIT_TAG master
-)
-FetchContent_MakeAvailable(Client)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DownloadDependecies.cmake)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS_DEBUG
             "/DWIN32 /D_WINDOWS /EHsc /WX /wd4355 /wd4251 /wd4250 /wd4996 /FS"
