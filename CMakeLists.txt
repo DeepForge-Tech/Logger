@@ -17,7 +17,7 @@ set(SOURCE_FILES
         src/Logger.cpp
         include/Logger.hpp
 )
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DownloadDependecies.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DownloadDependencies.cmake)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS_DEBUG
             "/DWIN32 /D_WINDOWS /EHsc /WX /wd4355 /wd4251 /wd4250 /wd4996 /FS"
