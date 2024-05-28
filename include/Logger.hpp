@@ -55,7 +55,7 @@ namespace Logger {
                         std::string function_name,
                         std::string log_text);
 
-    private:
+    protected:
         /* The 'MakeDirectory' function is used to create a directory (folder) in the file system.*/
         void MakeDirectory(std::string dir);
         /* The `convertSize` function is used to convert a given size string into bytes. */
