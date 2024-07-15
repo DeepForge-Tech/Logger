@@ -23,33 +23,37 @@
 #define FMT_HEADER_ONLY
 #include <fmt/format.h>
 
-namespace Logger {
-    class Logging {
+namespace Logger
+{
+    class Logging
+    {
     public:
         long MAX_SIZE;
         std::string logPath;
         std::unordered_map<std::string, int> LabelSize = {
-                {"byte", 1},
-                {"kb",   1024},
-                {"mb",   1048576},
-                {"gb",   1073741824}};
+            {"byte", 1},
+            {"kb", 1024},
+            {"mb", 1048576},
+            {"gb", 1073741824}};
         std::unordered_map<std::string, std::string> logInformation = {
-                {"DEBUG", "[DEBUG]"},
-                {"INFO", "[INFO]"},
-                {"ERROR", "[ERROR]"},
-                {"WARNING", "[WARNING]"},
-                {"SUCCESS", "[SUCCESS]"}
-        };
+            {"DEBUG", "[DEBUG]"},
+            {"INFO", "[INFO]"},
+            {"ERROR", "[ERROR]"},
+            {"WARNING", "[WARNING]"},
+            {"SUCCESS", "[SUCCESS]"}};
         LogClient::Client client;
 
-        Logging(const char *path = nullptr, const char *MaxSize = nullptr) {
+        Logging(const char *path = nullptr, const char *MaxSize = nullptr)
+        {
 #if defined(_WIN32)
             // Set console code page to UTF-8 so console known how to interpret string data
             SetConsoleOutputCP(CP_UTF8);
 #endif
-            if (path != nullptr) {
+            if (path != nullptr)
+            {
                 logPath = path;
-                if (MaxSize != nullptr) {
+                if (MaxSize != nullptr)
+                {
                     convertSize(MaxSize);
                 }
             }
@@ -57,14 +61,17 @@ namespace Logger {
 
         void writeLog(const char *type, std::string log_text);
         void sendError(std::string name_program,
-                        std::string architecture,
-                        std::string channel,
-                        std::string os_name,
-                        std::string function_name,
-                        std::string log_text);
+                       std::string architecture,
+                       std::string channel,
+                       std::string os_name,
+                       std::string function_name,
+                       std::string log_text);
 
-        void addLogToBuffer(const std::string& log_text);
+        void addLogToBuffer(const std::string &log_text);
         void processLogBuffer();
+        void setFinished(bool value);
+
+        void notifyBuffer();
 
     protected:
         void MakeDirectory(std::string dir);
