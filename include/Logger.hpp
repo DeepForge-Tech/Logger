@@ -15,6 +15,13 @@
 #include <unordered_map>
 #include <json/json.h>
 #include <LogClient/LogClient.hpp>
+#include <thread>
+#include <vector>
+#include <mutex>
+#include <condition_variable>
+#include <atomic>
+#define FMT_HEADER_ONLY
+#include <fmt/format.h>
 
 namespace Logger {
     class Logging {
@@ -47,6 +54,7 @@ namespace Logger {
                 }
             }
         }
+
         void writeLog(const char *type, std::string log_text);
         void sendError(std::string name_program,
                         std::string architecture,
@@ -55,18 +63,23 @@ namespace Logger {
                         std::string function_name,
                         std::string log_text);
 
-    protected:
-        /* The 'MakeDirectory' function is used to create a directory (folder) in the file system.*/
-        void MakeDirectory(std::string dir);
-        /* The `convertSize` function is used to convert a given size string into bytes. */
-        void convertSize(std::string size);
+        void addLogToBuffer(const std::string& log_text);
+        void processLogBuffer();
 
+    protected:
+        void MakeDirectory(std::string dir);
+        void convertSize(std::string size);
         static std::string replaceAll(std::string &str, const std::string &from, const std::string &to);
-        /* The `GetTime()` function is used to get the current time and format it as a string. */
         static std::string getTime();
-        // Function of make string to lower
         static std::string to_lower(std::string sentence);
         static std::string to_upper(std::string sentence);
+
+    private:
+        std::vector<std::string> logBuffer;
+        std::mutex bufferMutex;
+        std::condition_variable bufferCv;
+        std::atomic<bool> finished{false};
     };
 }
-#endif
+
+#endif // LOGGER_HEADER

@@ -2,9 +2,7 @@
 
 std::string Logger::Logging::to_lower(const std::string sentence) {
     std::string new_sentence;
-    /* The code snippet `for (int i = 0; i < sentence.length(); i++)` is a for loop that iterates over each character in the string `sentence`. */
-    for (int i = 0; i < sentence.length(); i++) {
-        char ch = sentence[i];
+    for (char ch : sentence) {
         ch = tolower(ch);
         new_sentence += ch;
     }
@@ -22,11 +20,9 @@ std::string Logger::Logging::replaceAll(std::string& str, const std::string& fro
 
 void Logger::Logging::convertSize(std::string size) {
     size = to_lower(size);
-    // Converting to bytes
     for (const auto &element: LabelSize) {
         if (size.find(element.first) != std::string::npos) {
             size = replaceAll(size, element.first, "");
-            /* The line `MAX_SIZE = stol(size) * element.second;` is calculating the maximum size in bytes based on the given size string and the corresponding label size. */
             MAX_SIZE = stol(size) * element.second;
             break;
         }
@@ -90,7 +86,6 @@ void Logger::Logging::MakeDirectory(std::string dir) {
     }
 }
 
-
 void Logger::Logging::sendError(std::string name_program, std::string architecture, std::string channel, 
                                 std::string os_name, std::string function_name,std::string log_text)
 {
@@ -110,48 +105,71 @@ std::string Logger::Logging::getTime()
     struct tm  tstruct;
     char       buf[80];
     tstruct = *localtime(&now);
-    // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
-    // for more information about date/time format
     strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
     return buf;
 }
 
 void Logger::Logging::writeLog(const char* type, std::string log_text)
 {
-    log_text = "[" + getTime() + "]::" + logInformation[to_upper(type)] + ":::" + log_text;
-    std::string logDir = std::filesystem::path(logPath).parent_path().generic_string();
-    if (!std::filesystem::exists(logDir)) {
-        std::filesystem::create_directory(logDir);
-    }
-
-    std::fstream file;
-    file.open(logPath,std::ifstream::ate | std::ios_base::app | std::ios_base::binary);
-    if (file.is_open()) {
-        // Get the current size of the file
-        const std::streampos file_size = file.tellg();
-        if (file_size > MAX_SIZE) {
-            file.close();
-            std::fstream new_file;
-            new_file.open(logPath,std::ios::out | std::ios::binary);
-            new_file << log_text << std::endl;
-            new_file.close();
+    std::string logDir;
+    log_text = fmt::format("[{}]::{}:::{}",getTime(),logInformation[to_upper(type)],log_text);
+    if (!logPath.empty())
+    {
+        logDir = std::filesystem::path(logPath).parent_path().generic_string();
+        if (!std::filesystem::exists(logDir)) {
+            std::filesystem::create_directory(logDir);
         }
-        else
-        {
-            file << log_text << std::endl;
-            file.close();
+
+        std::fstream file;
+        file.open(logPath, std::ifstream::ate | std::ios_base::app | std::ios_base::binary);
+        if (file.is_open()) {
+            const std::streampos file_size = file.tellg();
+            if (file_size > MAX_SIZE) {
+                file.close();
+                std::fstream new_file;
+                new_file.open(logPath, std::ios::out | std::ios::binary);
+                new_file << log_text << std::endl;
+                new_file.close();
+            }
+            else
+            {
+                file << log_text << std::endl;
+                file.close();
+            }
         }
     }
 }
+
 std::string Logger::Logging::to_upper(std::string sentence)
 {
     std::string new_sentence = "";
-    for (int i = 0; i < sentence.length(); i++)
+    for (char ch : sentence)
     {
-        char ch = sentence[i];
-        // cout << ch << endl;
-        ch = tolower(ch);
+        ch = toupper(ch);
         new_sentence += ch;
     }
     return new_sentence;
 }
+
+void Logger::Logging::addLogToBuffer(const std::string& log_text) {
+    {
+        std::lock_guard<std::mutex> lock(bufferMutex);
+        logBuffer.push_back(log_text);
+    }
+    bufferCv.notify_one();
+}
+
+void Logger::Logging::processLogBuffer() {
+    std::unique_lock<std::mutex> lock(bufferMutex);
+    while (!finished.load()) {
+        bufferCv.wait(lock, [this] { return !logBuffer.empty() || finished.load(); });
+        while (!logBuffer.empty()) {
+            std::string log = std::move(logBuffer.back());
+            logBuffer.pop_back();
+            lock.unlock();
+            std::cout << log << std::endl;  // Или другая обработка логов
+            lock.lock();
+        }
+    }
+}
+
