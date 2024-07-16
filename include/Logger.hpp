@@ -68,6 +68,7 @@ namespace Logger
                        std::string log_text);
 
         void addLogToBuffer(const std::string &log_text);
+        void readLogBuffer();
         void processLogBuffer();
         void setFinished(bool value);
 
@@ -85,6 +86,7 @@ namespace Logger
         std::vector<std::string> logBuffer;
         std::mutex bufferMutex;
         std::condition_variable bufferCv;
+        std::thread threadLogBuffer;
         std::atomic<bool> finished{false};
     };
 }

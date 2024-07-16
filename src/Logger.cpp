@@ -184,6 +184,11 @@ void Logger::Logging::addLogToBuffer(const std::string &log_text)
 
 void Logger::Logging::processLogBuffer()
 {
+    threadLogBuffer = std::thread(&Logger::Logging::readLogBuffer,this);
+}
+
+void Logger::Logging::readLogBuffer()
+{
     std::unique_lock<std::mutex> lock(bufferMutex);
     while (!finished.load())
     {
