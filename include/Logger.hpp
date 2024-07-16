@@ -59,6 +59,17 @@ namespace Logger
             }
         }
 
+        ~Logging()
+        {
+            this->setFinished(true); // Setting flag true for finish thread
+            this->notifyBuffer();    // Waking up the thread to complete
+            if (logThread.joinable())
+            {
+                logThread.join(); // Ожидание завершения потока
+                std::cout << logThread.get_id();
+            }
+        }
+
         void writeLog(const char *type, std::string log_text);
         void sendError(std::string name_program,
                        std::string architecture,
@@ -68,6 +79,7 @@ namespace Logger
                        std::string log_text);
 
         void addLogToBuffer(const std::string &log_text);
+        void readLogBuffer();
         void processLogBuffer();
         void setFinished(bool value);
 
@@ -85,6 +97,7 @@ namespace Logger
         std::vector<std::string> logBuffer;
         std::mutex bufferMutex;
         std::condition_variable bufferCv;
+        std::thread logThread;
         std::atomic<bool> finished{false};
     };
 }
