@@ -15,7 +15,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set(SOURCE_FILES
         src/Logger.cpp
-        include/Logger.hpp
 )
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DownloadDependencies.cmake)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
