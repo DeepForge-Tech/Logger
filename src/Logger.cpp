@@ -163,6 +163,12 @@ void Logger::Logging::writeLog(const char *type, std::string log_text)
     }
 }
 
+void Logger::Logging::printLog(const char *type, std::string log_text)
+{
+    log_text = fmt::format(fg(fmt::color(0xFF0000)),"[{}]::{}:::{}", getTime(), logInformation[to_upper(type)], log_text);
+    std::cout << log_text << std::endl;
+}
+
 std::string Logger::Logging::to_upper(std::string sentence)
 {
     std::string new_sentence = "";
@@ -174,7 +180,7 @@ std::string Logger::Logging::to_upper(std::string sentence)
     return new_sentence;
 }
 
-void Logger::Logging::addLogToBuffer(const std::string &log_text)
+void Logger::ThreadLogging::addLogToBuffer(const std::string &log_text)
 {
     {
         std::lock_guard<std::mutex> lock(bufferMutex);
@@ -183,12 +189,7 @@ void Logger::Logging::addLogToBuffer(const std::string &log_text)
     bufferCv.notify_one();
 }
 
-void Logger::Logging::processLogBuffer()
-{
-    logThread = std::thread(&Logger::Logging::readLogBuffer, this);
-}
-
-void Logger::Logging::readLogBuffer()
+void Logger::ThreadLogging::processLogBuffer()
 {
     try
     {
@@ -207,22 +208,18 @@ void Logger::Logging::readLogBuffer()
             }
         }
     }
-    catch (const std::exception &e)
+    catch (const std::exception &error)
     {
-        sendError("Logger", "N/A", "N/A", "Error", "Logger.readLogBuffer", e.what());
-    }
-    catch (...)
-    {
-        sendError("Logger", "N/A", "N/A", "Error", "Logger.readLogBuffer", "Unknown exception");
+        this->sendError("Logger", "Empty", "Empty", "Empty", "Logger.readLogBuffer", error.what());
     }
 }
 
-void Logger::Logging::setFinished(bool value)
+void Logger::ThreadLogging::setFinished(bool value)
 {
     finished = value;
 }
 
-void Logger::Logging::notifyBuffer()
+void Logger::ThreadLogging::notifyBuffer()
 {
     bufferCv.notify_one();
 }

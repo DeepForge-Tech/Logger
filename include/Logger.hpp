@@ -22,6 +22,7 @@
 #include <atomic>
 #define FMT_HEADER_ONLY
 #include <fmt/format.h>
+#include <fmt/color.h>
 
 namespace Logger
 {
@@ -56,47 +57,60 @@ namespace Logger
                     convertSize(MaxSize);
                 }
             }
-            processLogBuffer();
-        }
-
-        ~Logging()
-        {
-            setFinished(true);
-            notifyBuffer();
-            if (logThread.joinable())
-            {
-                logThread.join();
-            }
         }
 
         void writeLog(const char *type, std::string log_text);
-        void sendError(std::string name_program,
-                       std::string architecture,
-                       std::string channel,
-                       std::string os_name,
-                       std::string function_name,
-                       std::string log_text);
 
-        void addLogToBuffer(const std::string &log_text);
-        void readLogBuffer();
-        void processLogBuffer();
-        void setFinished(bool value);
+        void sendError(std::string name_program, std::string architecture, std::string channel,
+                       std::string os_name, std::string function_name, std::string log_text);
 
-        void notifyBuffer();
+        void printLog(const char *type, std::string log_text);
 
     protected:
         void MakeDirectory(std::string dir);
+
         void convertSize(std::string size);
+
         static std::string replaceAll(std::string &str, const std::string &from, const std::string &to);
+
         static std::string getTime();
+
         static std::string to_lower(std::string sentence);
+
         static std::string to_upper(std::string sentence);
+    };
+
+    class ThreadLogging : public Logging
+    {
+    public:
+        ThreadLogging(const char *path = nullptr, const char *MaxSize = nullptr)
+        {
+#if defined(_WIN32)
+            SetConsoleOutputCP(CP_UTF8);
+#endif
+            if (path != nullptr)
+            {
+                logPath = path;
+                if (MaxSize != nullptr)
+                {
+                    convertSize(MaxSize);
+                }
+            }
+            processLogBuffer();
+        }
+
+        void addLogToBuffer(const std::string &log_text);
+
+        void processLogBuffer();
+
+        void setFinished(bool value);
+
+        void notifyBuffer();
 
     private:
         std::queue<std::string> logBuffer;
         std::mutex bufferMutex;
         std::condition_variable bufferCv;
-        std::thread logThread;
         std::atomic<bool> finished{false};
     };
 }
