@@ -26,23 +26,15 @@
 
 namespace Logger
 {
+    const char debug_label[6] = "DEBUG";
+    const char info_label[5] = "INFO";
+    const char error_label[6] = "ERROR";
+    const char warning_label[8] = "WARNING";
+    const char success_label[8] = "SUCCESS";
+
     class Logging
     {
     public:
-        long MAX_SIZE;
-        std::string logPath;
-        std::unordered_map<std::string, int> LabelSize = {
-            {"byte", 1},
-            {"kb", 1024},
-            {"mb", 1048576},
-            {"gb", 1073741824}};
-        std::unordered_map<std::string, std::string> logInformation = {
-            {"DEBUG", "[DEBUG]"},
-            {"INFO", "[INFO]"},
-            {"ERROR", "[ERROR]"},
-            {"WARNING", "[WARNING]"},
-            {"SUCCESS", "[SUCCESS]"}};
-        LogClient::Client client;
 
         Logging(const char *path = nullptr, const char *MaxSize = nullptr)
         {
@@ -64,9 +56,26 @@ namespace Logger
         void sendError(std::string name_program, std::string architecture, std::string channel,
                        std::string os_name, std::string function_name, std::string log_text);
 
-        void printLog(const char *type, std::string log_text);
+        void printLog(const char *type, std::string log_text, bool with_time);
 
     protected:
+        std::string logPath;
+        long MAX_SIZE;
+        std::unordered_map<std::string, int> LabelSize = {
+            {"byte", 1},
+            {"kb", 1024},
+            {"mb", 1048576},
+            {"gb", 1073741824}};
+
+        std::unordered_map<std::string, int> logColor = {
+            {debug_label, 0xB187EB},
+            {info_label, 0x87CEEB},
+            {error_label, 0xEB8787},
+            {warning_label, 0xFFC080},
+            {success_label, 0xC6E2B5}};
+
+        LogClient::Client client;
+
         void MakeDirectory(std::string dir);
 
         void convertSize(std::string size);

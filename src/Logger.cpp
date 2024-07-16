@@ -132,7 +132,7 @@ std::string Logger::Logging::getTime()
 void Logger::Logging::writeLog(const char *type, std::string log_text)
 {
     std::string logDir;
-    log_text = fmt::format("[{}]::{}:::{}", getTime(), logInformation[to_upper(type)], log_text);
+    log_text = fmt::format("[{}]::{}:::{}", getTime(), type, log_text);
     if (!logPath.empty())
     {
         logDir = std::filesystem::path(logPath).parent_path().generic_string();
@@ -163,9 +163,24 @@ void Logger::Logging::writeLog(const char *type, std::string log_text)
     }
 }
 
-void Logger::Logging::printLog(const char *type, std::string log_text)
+void Logger::Logging::printLog(const char *type, std::string log_text, bool with_time)
 {
-    log_text = fmt::format(fg(fmt::color(0xFF0000)),"[{}]::{}:::{}", getTime(), logInformation[to_upper(type)], log_text);
+    if (with_time)
+    {
+        log_text = fmt::format(
+            "[{}]:::[{}]::{}",
+            getTime(),
+            fmt::format(fg(fmt::color(logColor[type])),"{}",type),
+            log_text);
+    }
+    else
+    {
+        log_text = fmt::format(
+            "{}:::{}",
+            fmt::format(fg(fmt::color(logColor[type])),"{}",type),
+            log_text);
+    }
+    // log_text = with_time ? fmt::format(fg(fmt::color(type_color))), "[{}]::{}:::{}", getTime(), logInformation[to_upper((type))], log_text);
     std::cout << log_text << std::endl;
 }
 
