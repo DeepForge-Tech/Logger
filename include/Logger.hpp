@@ -16,7 +16,7 @@
 #include <json/json.h>
 #include <LogClient/LogClient.hpp>
 #include <thread>
-#include <vector>
+#include <queue>
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
@@ -46,7 +46,6 @@ namespace Logger
         Logging(const char *path = nullptr, const char *MaxSize = nullptr)
         {
 #if defined(_WIN32)
-            // Set console code page to UTF-8 so console known how to interpret string data
             SetConsoleOutputCP(CP_UTF8);
 #endif
             if (path != nullptr)
@@ -57,16 +56,16 @@ namespace Logger
                     convertSize(MaxSize);
                 }
             }
+            processLogBuffer();
         }
 
         ~Logging()
         {
-            this->setFinished(true); // Setting flag true for finish thread
-            this->notifyBuffer();    // Waking up the thread to complete
+            setFinished(true);
+            notifyBuffer();
             if (logThread.joinable())
             {
-                logThread.join(); // Ожидание завершения потока
-                std::cout << logThread.get_id();
+                logThread.join();
             }
         }
 
@@ -94,7 +93,7 @@ namespace Logger
         static std::string to_upper(std::string sentence);
 
     private:
-        std::vector<std::string> logBuffer;
+        std::queue<std::string> logBuffer;
         std::mutex bufferMutex;
         std::condition_variable bufferCv;
         std::thread logThread;

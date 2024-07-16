@@ -75,6 +75,7 @@ void Logger::Logging::MakeDirectory(std::string dir)
             CreateDirectoryA(fullPath.c_str(), nullptr);
         }
 #else
+        delimiter = "/";
         while ((pos = dir.find(delimiter)) != std::string::npos)
         {
             currentDir = dir.substr(0, pos);
@@ -177,31 +178,42 @@ void Logger::Logging::addLogToBuffer(const std::string &log_text)
 {
     {
         std::lock_guard<std::mutex> lock(bufferMutex);
-        logBuffer.push_back(log_text);
+        logBuffer.push(log_text);
     }
     bufferCv.notify_one();
 }
 
 void Logger::Logging::processLogBuffer()
 {
-    logThread = std::thread(&Logger::Logging::readLogBuffer,this);
+    logThread = std::thread(&Logger::Logging::readLogBuffer, this);
 }
 
 void Logger::Logging::readLogBuffer()
 {
-    std::unique_lock<std::mutex> lock(bufferMutex);
-    while (!finished.load())
+    try
     {
-        bufferCv.wait(lock, [this]
-                      { return !logBuffer.empty() || finished.load(); });
-        while (!logBuffer.empty())
+        std::unique_lock<std::mutex> lock(bufferMutex);
+        while (!finished.load())
         {
-            std::string log = std::move(logBuffer.back());
-            logBuffer.pop_back();
-            lock.unlock();
-            std::cout << log << std::endl; // Или другая обработка логов
-            lock.lock();
+            bufferCv.wait(lock, [this]
+                          { return !logBuffer.empty() || finished.load(); });
+            while (!logBuffer.empty())
+            {
+                std::string log = std::move(logBuffer.front());
+                logBuffer.pop();
+                lock.unlock();
+                std::cout << log << std::endl; // Или другая обработка логов
+                lock.lock();
+            }
         }
+    }
+    catch (const std::exception &e)
+    {
+        sendError("Logger", "N/A", "N/A", "Error", "Logger.readLogBuffer", e.what());
+    }
+    catch (...)
+    {
+        sendError("Logger", "N/A", "N/A", "Error", "Logger.readLogBuffer", "Unknown exception");
     }
 }
 
