@@ -221,7 +221,7 @@ void Logger::Logging::setWithDateTime(bool value)
     withDateTime = std::move(value);
 }
 
-void Logger::ThreadLogging::addLogToBuffer(const std::string &log_text)
+void Logger::Logging::addLogToBuffer(const std::string &log_text)
 {
     {
         std::lock_guard<std::mutex> lock(bufferMutex);
@@ -230,7 +230,7 @@ void Logger::ThreadLogging::addLogToBuffer(const std::string &log_text)
     bufferCv.notify_one();  // Notify after releasing the lock to avoid waking up while holding the lock
 }
 
-void Logger::ThreadLogging::processLogBuffer()
+void Logger::Logging::processLogBuffer()
 {
     try
     {
@@ -255,13 +255,13 @@ void Logger::ThreadLogging::processLogBuffer()
     }
 }
 
-void Logger::ThreadLogging::setFinished(bool value)
+void Logger::Logging::setFinished(bool value)
 {
     finished.store(value);
     bufferCv.notify_all();  // Notify all to wake up any waiting threads to exit
 }
 
-void Logger::ThreadLogging::notifyBuffer()
+void Logger::Logging::notifyBuffer()
 {
     bufferCv.notify_one();
 }

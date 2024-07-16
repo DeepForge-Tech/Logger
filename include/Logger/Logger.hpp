@@ -65,6 +65,14 @@ namespace Logger
 
         void setWithDateTime(bool value);
 
+        void addLogToBuffer(const std::string &log_text);
+
+        void processLogBuffer();
+
+        void setFinished(bool value);
+
+        void notifyBuffer();
+
     protected:
         std::string logPath;
         std::string logServerURL;
@@ -96,37 +104,8 @@ namespace Logger
         static std::string to_lower(std::string sentence);
 
         static std::string to_upper(std::string sentence);
-    };
-
-    class ThreadLogging : public Logging
-    {
-    public:
-        ThreadLogging(const char *path = nullptr, const char *MaxSize = nullptr)
-        {
-#if defined(_WIN32)
-            SetConsoleOutputCP(CP_UTF8);
-#endif
-            if (path != nullptr)
-            {
-                logPath = path;
-                if (MaxSize != nullptr)
-                {
-                    convertSize(MaxSize);
-                }
-            }
-            processLogBuffer();
-        }
-
-        void addLogToBuffer(const std::string &log_text);
-
-        void processLogBuffer();
-
-        void setFinished(bool value);
-
-        void notifyBuffer();
-
     private:
-        std::queue<std::string> logBuffer;
+    std::queue<std::string> logBuffer;
         std::mutex bufferMutex;
         std::condition_variable bufferCv;
         std::atomic<bool> finished{false};
