@@ -42,7 +42,7 @@ void Logger::Logging::MakeDirectory(std::string dir)
     {
         std::string currentDir;
         std::string fullPath;
-        std::string delimiter = "\\";
+        const std::string delimiter = "\\";
         size_t pos = 0;
 #if defined(_WIN32)
         while ((pos = dir.find(delimiter)) != std::string::npos)
@@ -109,14 +109,17 @@ void Logger::Logging::MakeDirectory(std::string dir)
 void Logger::Logging::sendError(std::string name_program, std::string architecture, std::string channel,
                                 std::string os_name, std::string function_name, std::string log_text)
 {
-    Json::Value data;
-    data["name_program"] = name_program;
-    data["architecture"] = architecture;
-    data["channel"] = channel;
-    data["os_name"] = os_name;
-    data["function_name"] = function_name;
-    data["log_text"] = log_text;
-    client.POST("https://logserver.alwaysdata.net/api/logs/add_log", data);
+    if (!logServerURL.empty())
+    {
+        Json::Value data;
+        data["name_program"] = name_program;
+        data["architecture"] = architecture;
+        data["channel"] = channel;
+        data["os_name"] = os_name;
+        data["function_name"] = function_name;
+        data["log_text"] = log_text;
+        client.POST(logServerURL.c_str(), data);
+    }
 }
 
 std::string Logger::Logging::getTime()
@@ -132,7 +135,7 @@ std::string Logger::Logging::getTime()
 void Logger::Logging::writeLog(const char *type, std::string log_text)
 {
     std::string logDir;
-    log_text = fmt::format("[{}]::{}:::{}", getTime(), type, log_text);
+    log_text = fmt::format("{} | {} | {}", getTime(), type, log_text);
     if (!logPath.empty())
     {
         logDir = std::filesystem::path(logPath).parent_path().generic_string();
@@ -163,24 +166,42 @@ void Logger::Logging::writeLog(const char *type, std::string log_text)
     }
 }
 
-void Logger::Logging::printLog(const char *type, std::string log_text, bool with_time)
+void Logger::Logging::printLogWithDateTime(const char *type, std::string log_text)
 {
-    if (with_time)
+    log_text = fmt::format(
+        "{} | {} | {}",
+        getTime(),
+        fmt::format(fg(fmt::color(logColor[type])), "{}", type),
+        log_text);
+    std::cout << log_text << std::endl;
+}
+
+void Logger::Logging::printLogWithoutDatetime(const char *type, std::string log_text)
+{
+    log_text = fmt::format(
+        "[{}]::{}",
+        fmt::format(fg(fmt::color(logColor[type])), "{}", type),
+        log_text);
+    std::cout << log_text << std::endl;
+}
+
+void Logger::Logging::printLog(const char *type, std::string log_text,bool withDateTime)
+{
+    if (withDateTime)
     {
         log_text = fmt::format(
-            "[{}]:::[{}]::{}",
+            "{} | {} | {}",
             getTime(),
-            fmt::format(fg(fmt::color(logColor[type])),"{}",type),
+            fmt::format(fg(fmt::color(logColor[type])), "{}", type),
             log_text);
     }
     else
     {
         log_text = fmt::format(
-            "{}:::{}",
-            fmt::format(fg(fmt::color(logColor[type])),"{}",type),
+            "[{}]::{}",
+            fmt::format(fg(fmt::color(logColor[type])), "{}", type),
             log_text);
     }
-    // log_text = with_time ? fmt::format(fg(fmt::color(type_color))), "[{}]::{}:::{}", getTime(), logInformation[to_upper((type))], log_text);
     std::cout << log_text << std::endl;
 }
 
@@ -195,13 +216,18 @@ std::string Logger::Logging::to_upper(std::string sentence)
     return new_sentence;
 }
 
+void Logger::Logging::setWithDateTime(bool value)
+{
+    withDateTime = std::move(value);
+}
+
 void Logger::ThreadLogging::addLogToBuffer(const std::string &log_text)
 {
     {
         std::lock_guard<std::mutex> lock(bufferMutex);
         logBuffer.push(log_text);
     }
-    bufferCv.notify_one();
+    this->bufferCv.notify_one();
 }
 
 void Logger::ThreadLogging::processLogBuffer()
@@ -215,10 +241,9 @@ void Logger::ThreadLogging::processLogBuffer()
                           { return !logBuffer.empty() || finished.load(); });
             while (!logBuffer.empty())
             {
-                std::string log = std::move(logBuffer.front());
                 logBuffer.pop();
                 lock.unlock();
-                std::cout << log << std::endl; // Или другая обработка логов
+                withDateTime ? printLogWithDateTime(Logger::info_label, logBuffer.front()) : printLogWithoutDatetime(Logger::info_label, logBuffer.front());
                 lock.lock();
             }
         }
@@ -231,10 +256,10 @@ void Logger::ThreadLogging::processLogBuffer()
 
 void Logger::ThreadLogging::setFinished(bool value)
 {
-    finished = value;
+    finished = std::move(value);
 }
 
 void Logger::ThreadLogging::notifyBuffer()
 {
-    bufferCv.notify_one();
+    this->bufferCv.notify_one();
 }

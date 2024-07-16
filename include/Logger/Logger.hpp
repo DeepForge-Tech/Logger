@@ -36,19 +36,20 @@ namespace Logger
     {
     public:
 
-        Logging(const char *path = nullptr, const char *MaxSize = nullptr)
+        Logging(const char *Path = nullptr, const char *MaxSize = nullptr, const std::string LogServerURL = "")
         {
 #if defined(_WIN32)
             SetConsoleOutputCP(CP_UTF8);
 #endif
-            if (path != nullptr)
+            if (Path != nullptr)
             {
-                logPath = path;
+                logPath = std::move(Path);
                 if (MaxSize != nullptr)
                 {
                     convertSize(MaxSize);
                 }
             }
+            logServerURL = std::move(LogServerURL);
         }
 
         void writeLog(const char *type, std::string log_text);
@@ -56,10 +57,18 @@ namespace Logger
         void sendError(std::string name_program, std::string architecture, std::string channel,
                        std::string os_name, std::string function_name, std::string log_text);
 
-        void printLog(const char *type, std::string log_text, bool with_time);
+        void printLogWithDateTime(const char *type, std::string log_text);
+
+        void printLogWithoutDatetime(const char *type, std::string log_text);
+
+        void printLog(const char *type, std::string log_text,bool withDateTime = true);
+
+        void setWithDateTime(bool value);
 
     protected:
         std::string logPath;
+        std::string logServerURL;
+        bool withDateTime = true;
         long MAX_SIZE;
         std::unordered_map<std::string, int> LabelSize = {
             {"byte", 1},
