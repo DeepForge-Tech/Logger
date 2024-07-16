@@ -1,5 +1,5 @@
 #include <iostream>
-#include <Logger.hpp>
+#include <Logger/Logger.hpp>
 
 using namespace std;
 
@@ -12,6 +12,6 @@ int main()
     logger.printLog(Logger::debug_label,"grey color of log text",true);
     logger.printLog(Logger::info_label,"blue color of log text",true);
     logger.printLog(Logger::success_label,"green color of log text",true);
-    logger.printLog(Logger::warning_label,"yellow color of log text",true);
+    logger.printLog(Logger::warning_label,"orange color of log text",true);
     return 0;
 }

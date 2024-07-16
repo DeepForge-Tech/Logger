@@ -1,4 +1,4 @@
-#include <Logger.hpp>
+#include <Logger/Logger.hpp>
 
 std::string Logger::Logging::to_lower(const std::string sentence)
 {

@@ -69,9 +69,9 @@ namespace Logger
 
         std::unordered_map<std::string, int> logColor = {
             {debug_label, 0xB187EB},
-            {info_label, 0x87CEEB},
-            {error_label, 0xEB8787},
-            {warning_label, 0xFFC080},
+            {info_label, 0x2AC3DE},
+            {error_label, 0xFF3737},
+            {warning_label, 0xFFAB70},
             {success_label, 0xC6E2B5}};
 
         LogClient::Client client;
