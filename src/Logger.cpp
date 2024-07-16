@@ -227,7 +227,7 @@ void Logger::ThreadLogging::addLogToBuffer(const std::string &log_text)
         std::lock_guard<std::mutex> lock(bufferMutex);
         logBuffer.push(log_text);
     }
-    this->bufferCv.notify_one();
+    bufferCv.notify_one();  // Notify after releasing the lock to avoid waking up while holding the lock
 }
 
 void Logger::ThreadLogging::processLogBuffer()
@@ -241,25 +241,27 @@ void Logger::ThreadLogging::processLogBuffer()
                           { return !logBuffer.empty() || finished.load(); });
             while (!logBuffer.empty())
             {
+                std::string logEntry = logBuffer.front();
                 logBuffer.pop();
                 lock.unlock();
-                withDateTime ? printLogWithDateTime(Logger::info_label, logBuffer.front()) : printLogWithoutDatetime(Logger::info_label, logBuffer.front());
+                withDateTime ? printLogWithDateTime(Logger::info_label, logEntry) : printLogWithoutDatetime(Logger::info_label, logEntry);
                 lock.lock();
             }
         }
     }
     catch (const std::exception &error)
     {
-        this->sendError("Logger", "Empty", "Empty", "Empty", "Logger.readLogBuffer", error.what());
+        this->sendError("Logger", "Empty", "Empty", "Empty", "Logger.processLogBuffer", error.what());
     }
 }
 
 void Logger::ThreadLogging::setFinished(bool value)
 {
-    finished = std::move(value);
+    finished.store(value);
+    bufferCv.notify_all();  // Notify all to wake up any waiting threads to exit
 }
 
 void Logger::ThreadLogging::notifyBuffer()
 {
-    this->bufferCv.notify_one();
+    bufferCv.notify_one();
 }
