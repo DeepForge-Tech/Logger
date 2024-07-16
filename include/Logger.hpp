@@ -59,6 +59,14 @@ namespace Logger
             }
         }
 
+        ~Logging()
+        {
+            if (threadLogBuffer.joinable())
+            {
+                threadLogBuffer.join();
+            }
+        }
+
         void writeLog(const char *type, std::string log_text);
         void sendError(std::string name_program,
                        std::string architecture,
