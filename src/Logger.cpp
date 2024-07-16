@@ -42,7 +42,7 @@ void Logger::Logging::MakeDirectory(std::string dir)
     {
         std::string currentDir;
         std::string fullPath;
-        const std::string delimiter = "\\";
+        std::string delimiter = "\\";
         size_t pos = 0;
 #if defined(_WIN32)
         while ((pos = dir.find(delimiter)) != std::string::npos)
