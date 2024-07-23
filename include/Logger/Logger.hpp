@@ -67,6 +67,8 @@ namespace Logger
 
         void processLogBuffer(const char *type);
 
+        void processFormattedLogBuffer();
+
         // void processFormattedLogBuffer();
 
         void setFinished(bool value);
