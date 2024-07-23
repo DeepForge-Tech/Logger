@@ -255,6 +255,31 @@ void Logger::Logging::processLogBuffer()
     }
 }
 
+void Logger::Logging::processFormattedLogBuffer()
+{
+    try
+    {
+        std::unique_lock<std::mutex> lock(bufferMutex);
+        while (!finished.load())
+        {
+            bufferCv.wait(lock, [this]
+                          { return !logBuffer.empty() || finished.load(); });
+            while (!logBuffer.empty())
+            {
+                std::string logEntry = logBuffer.front();
+                logBuffer.pop();
+                lock.unlock();
+                std::cout << logEntry << std::endl;
+                lock.lock();
+            }
+        }
+    }
+    catch (const std::exception &error)
+    {
+        this->sendError("Logger", "Empty", "Empty", "Empty", "Logger.processFormattedLogBuffer", error.what());
+    }
+}
+
 void Logger::Logging::setFinished(bool value)
 {
     finished.store(value);

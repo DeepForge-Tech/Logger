@@ -69,6 +69,8 @@ namespace Logger
 
         void processLogBuffer();
 
+        void processFormattedLogBuffer();
+
         void setFinished(bool value);
 
         void notifyBuffer();

@@ -83,5 +83,5 @@ set(TEST_SOURCE_FILES
         #   ./src/test/MainTest.hpp
 )
 
-add_executable(example examples/main.cpp)
-target_link_libraries(example PRIVATE Client jsoncpp_static Logger)
+add_executable(LogExample examples/main.cpp)
+target_link_libraries(LogExample PRIVATE Client jsoncpp_static Logger)
