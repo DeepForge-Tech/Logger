@@ -166,26 +166,12 @@ void Logger::Logging::writeLog(const char *type, std::string log_text)
     }
 }
 
-void Logger::Logging::printLogWithDateTime(const char *type, std::string log_text)
+void Logger::Logging::printLog(const char *type, std::string log_text, bool withDateTime)
 {
-    log_text = fmt::format(
-        "{} | {} | {}",
-        getTime(),
-        fmt::format(fg(fmt::color(logColor[type])), "{}", type),
-        log_text);
-    std::cout << log_text << std::endl;
+    std::cout << log(type, log_text, withDateTime) << std::endl;
 }
 
-void Logger::Logging::printLogWithoutDatetime(const char *type, std::string log_text)
-{
-    log_text = fmt::format(
-        "[{}]::{}",
-        fmt::format(fg(fmt::color(logColor[type])), "{}", type),
-        log_text);
-    std::cout << log_text << std::endl;
-}
-
-void Logger::Logging::printLog(const char *type, std::string log_text,bool withDateTime)
+std::string Logger::Logging::log(const char *type, std::string log_text, bool withDateTime)
 {
     if (withDateTime)
     {
@@ -202,9 +188,8 @@ void Logger::Logging::printLog(const char *type, std::string log_text,bool withD
             fmt::format(fg(fmt::color(logColor[type])), "{}", type),
             log_text);
     }
-    std::cout << log_text << std::endl;
+    return log_text;
 }
-
 std::string Logger::Logging::to_upper(std::string sentence)
 {
     std::string new_sentence = "";
@@ -221,16 +206,14 @@ void Logger::Logging::setWithDateTime(bool value)
     withDateTime = std::move(value);
 }
 
-void Logger::Logging::addLogToBuffer(const std::string &log_text)
+void Logger::Logging::addLogToBuffer(const char *type, std::string log_text, bool withDateTime)
 {
-    {
-        std::lock_guard<std::mutex> lock(bufferMutex);
-        logBuffer.push(log_text);
-    }
-    bufferCv.notify_one();  // Notify after releasing the lock to avoid waking up while holding the lock
+    std::lock_guard<std::mutex> lock(bufferMutex);
+    logBuffer.push(log(type, log_text, withDateTime));
+    bufferCv.notify_one(); // Notify after releasing the lock to avoid waking up while holding the lock
 }
 
-void Logger::Logging::processLogBuffer()
+void Logger::Logging::processLogBuffer(const char *type)
 {
     try
     {
@@ -244,7 +227,7 @@ void Logger::Logging::processLogBuffer()
                 std::string logEntry = logBuffer.front();
                 logBuffer.pop();
                 lock.unlock();
-                withDateTime ? printLogWithDateTime(Logger::info_label, logEntry) : printLogWithoutDatetime(Logger::info_label, logEntry);
+                printLog(type, logEntry, withDateTime);
                 lock.lock();
             }
         }
@@ -255,35 +238,35 @@ void Logger::Logging::processLogBuffer()
     }
 }
 
-void Logger::Logging::processFormattedLogBuffer()
-{
-    try
-    {
-        std::unique_lock<std::mutex> lock(bufferMutex);
-        while (!finished.load())
-        {
-            bufferCv.wait(lock, [this]
-                          { return !logBuffer.empty() || finished.load(); });
-            while (!logBuffer.empty())
-            {
-                std::string logEntry = logBuffer.front();
-                logBuffer.pop();
-                lock.unlock();
-                std::cout << logEntry << std::endl;
-                lock.lock();
-            }
-        }
-    }
-    catch (const std::exception &error)
-    {
-        this->sendError("Logger", "Empty", "Empty", "Empty", "Logger.processFormattedLogBuffer", error.what());
-    }
-}
+// void Logger::Logging::processFormattedLogBuffer()
+// {
+//     try
+//     {
+//         std::unique_lock<std::mutex> lock(bufferMutex);
+//         while (!finished.load())
+//         {
+//             bufferCv.wait(lock, [this]
+//                           { return !logBuffer.empty() || finished.load(); });
+//             while (!logBuffer.empty())
+//             {
+//                 std::string logEntry = logBuffer.front();
+//                 logBuffer.pop();
+//                 lock.unlock();
+//                 std::cout << logEntry << std::endl;
+//                 lock.lock();
+//             }
+//         }
+//     }
+//     catch (const std::exception &error)
+//     {
+//         this->sendError("Logger", "Empty", "Empty", "Empty", "Logger.processFormattedLogBuffer", error.what());
+//     }
+// }
 
 void Logger::Logging::setFinished(bool value)
 {
     finished.store(value);
-    bufferCv.notify_all();  // Notify all to wake up any waiting threads to exit
+    bufferCv.notify_all(); // Notify all to wake up any waiting threads to exit
 }
 
 void Logger::Logging::notifyBuffer()
