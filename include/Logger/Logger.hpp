@@ -57,10 +57,6 @@ namespace Logger
         void sendError(std::string name_program, std::string architecture, std::string channel,
                        std::string os_name, std::string function_name, std::string log_text);
 
-        // void printLogWithDateTime(const char *type, std::string log_text);
-
-        // void printLogWithoutDatetime(const char *type, std::string log_text);
-
         void printLog(const char *type, std::string log_text,bool withDateTime = true);
 
         std::string log(const char *type, std::string log_text,bool withDateTime = true);
@@ -68,8 +64,6 @@ namespace Logger
         void setWithDateTime(bool value);
 
         void addLogToBuffer(const char *type, std::string log_text,bool withDateTime);
-
-        // void addFormattedLogToBuffer(const std::string &log_text);
 
         void processLogBuffer(const char *type);
 
