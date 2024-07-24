@@ -54,6 +54,8 @@ namespace Logger
 
         void writeLog(const char *type, std::string log_text);
 
+        void write(const std::string text);
+
         void sendError(std::string name_program, std::string architecture, std::string channel,
                        std::string os_name, std::string function_name, std::string log_text);
 

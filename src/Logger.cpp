@@ -135,7 +135,13 @@ std::string Logger::Logging::getTime()
 void Logger::Logging::writeLog(const char *type, std::string log_text)
 {
     std::string logDir;
-    log_text = fmt::format("{} | {} | {}", getTime(), type, log_text);
+    log_text = log(type,log_text,true);
+    write(log_text);
+}
+
+void Logger::Logging::write(const std::string text)
+{
+    std::string logDir;
     if (!logPath.empty())
     {
         logDir = std::filesystem::path(logPath).parent_path().generic_string();
@@ -154,12 +160,12 @@ void Logger::Logging::writeLog(const char *type, std::string log_text)
                 file.close();
                 std::fstream new_file;
                 new_file.open(logPath, std::ios::out | std::ios::binary);
-                new_file << log_text << std::endl;
+                new_file << std::move(text) << std::endl;
                 new_file.close();
             }
             else
             {
-                file << log_text << std::endl;
+                file << std::move(text) << std::endl;
                 file.close();
             }
         }
@@ -227,7 +233,9 @@ void Logger::Logging::processLogBuffer(const char *type)
                 std::string logEntry = logBuffer.front();
                 logBuffer.pop();
                 lock.unlock();
-                printLog(type, logEntry, withDateTime);
+                logEntry = log(type, logEntry, withDateTime);
+                std::cout << logEntry << std::endl;
+                write(std::move(logEntry));
                 lock.lock();
             }
         }
