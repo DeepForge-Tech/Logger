@@ -261,6 +261,7 @@ void Logger::Logging::processFormattedLogBuffer()
                 logBuffer.pop();
                 lock.unlock();
                 std::cout << logEntry << std::endl;
+                write(logEntry);
                 lock.lock();
             }
         }
