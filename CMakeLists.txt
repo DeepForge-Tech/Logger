@@ -32,11 +32,11 @@ add_library(Logger ${SOURCE_FILES})
 if (WIN32)
     set(LIBRARIES
             Client
-            jsoncpp_static
+            jsoncpp_lib
     )
     set(TEST_LIBRARIES
             Client
-            jsoncpp_static
+            jsoncpp_lib
             GTest::gtest_main
             GTest::gmock_main
     )
@@ -44,22 +44,22 @@ elseif (APPLE)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -lstdc++")
     set(LIBRARIES
             Client
-            jsoncpp_static
+            jsoncpp_lib
     )
     set(TEST_LIBRARIES
             Client
-            jsoncpp_static
+            jsoncpp_lib
             GTest::gtest_main
             GTest::gmock_main
     )
 elseif (UNIX)
     set(LIBRARIES
             Client
-            jsoncpp_static
+            jsoncpp_lib
     )
     set(TEST_LIBRARIES
             Client
-            jsoncpp_static
+            jsoncpp_lib
             GTest::gtest_main
             GTest::gmock_main
     )
@@ -84,4 +84,4 @@ set(TEST_SOURCE_FILES
 )
 
 add_executable(LogExample examples/main.cpp)
-target_link_libraries(LogExample PRIVATE Client jsoncpp_static Logger)
+target_link_libraries(LogExample PRIVATE Client jsoncpp_lib Logger)
