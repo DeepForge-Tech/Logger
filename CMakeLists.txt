@@ -33,11 +33,11 @@ add_library(Logger ${SOURCE_FILES})
 if (WIN32)
     set(LIBRARIES
             Client
+            fmt::fmt
             JsonCpp::JsonCpp
     )
     set(TEST_LIBRARIES
-            Client
-            JsonCpp::JsonCpp
+            Logger
             GTest::gtest_main
             GTest::gmock_main
     )
@@ -45,22 +45,22 @@ elseif (APPLE)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -lstdc++")
     set(LIBRARIES
             Client
+            fmt::fmt
             JsonCpp::JsonCpp
     )
     set(TEST_LIBRARIES
-            Client
-            JsonCpp::JsonCpp
+            Logger
             GTest::gtest_main
             GTest::gmock_main
     )
 elseif (UNIX)
     set(LIBRARIES
             Client
+            fmt::fmt
             JsonCpp::JsonCpp
     )
     set(TEST_LIBRARIES
-            Client
-            JsonCpp::JsonCpp
+            Logger
             GTest::gtest_main
             GTest::gmock_main
     )
